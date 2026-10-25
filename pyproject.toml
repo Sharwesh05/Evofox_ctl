@@ -11,6 +11,7 @@ dependencies = []
 
 [project.optional-dependencies]
 hidapi = ["hidapi"]
+build = ["pyinstaller", "pillow"]
 
 [project.scripts]
 ghostx = "ghostx.cli:main"

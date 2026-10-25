@@ -2,8 +2,14 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+*.egg
 build/
 dist/
+pip-wheel-metadata/
+.eggs/
+.tox/
+.nox/
+.hypothesis/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -15,17 +21,43 @@ htmlcov/
 venv/
 env/
 
+# --- packaging (PyInstaller, tools/build_exe.py)
+*.spec
+*.exe
+*.ico
+*.manifest
+*.zip
+
 # --- editors / OS
 .vscode/
 .idea/
 *.swp
+*~
 .DS_Store
 Thumbs.db
+ehthumbs.db
 desktop.ini
+$RECYCLE.BIN/
+
+# --- local config, secrets and tooling state
+.env
+.env.*
+*.local
+.claude/settings.local.json
+
+# --- merge / backup leftovers
+*.bak
+*.orig
+*.rej
+
+# --- personal device backups made with `ghostx dump` (use a name like examples/*.json to commit one)
+/*.json
 
 # --- logs and local scratch files
 *.log
 *.tmp
+.coverage.*
+coverage.xml
 
 # --- reverse-engineering workspace (site/)
 # Downloaded copies of the vendor web app and the de-obfuscated output are third-party code and can be

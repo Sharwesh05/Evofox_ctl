@@ -1,0 +1,73 @@
+name: Windows
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Unit tests
+        run: python -m unittest discover -s tests -t . -v
+
+  build-exe:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install build tools
+        run: python -m pip install -e ".[build]"
+      - name: Build GhostX.exe
+        run: python tools/build_exe.py
+      - name: Smoke test (window opens and stays up)
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist\GhostX.exe -PassThru
+          Start-Sleep -Seconds 8
+          $titles = (Get-Process GhostX -ErrorAction SilentlyContinue).MainWindowTitle -join ","
+          Get-Process GhostX -ErrorAction SilentlyContinue | Stop-Process -Force
+          if ($titles -notmatch "Ghost X") { throw "GUI window did not appear (titles: '$titles')" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GhostX-windows
+          path: dist/GhostX.exe
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-exe
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: GhostX-windows
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" GhostX.exe --repo "$GITHUB_REPOSITORY" --generate-notes
