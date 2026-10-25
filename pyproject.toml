@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ghostx"
+version = "0.1.0"
+description = "Configuration tool for the EvoFox Ghost X mouse"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+hidapi = ["hidapi"]
+
+[project.scripts]
+ghostx = "ghostx.cli:main"
+
+[tool.setuptools]
+packages = ["ghostx", "ghostx.gui"]
+
+[tool.setuptools.package-data]
+"ghostx.gui" = ["assets/*.png"]
+ghostx = ["data/*.json"]
